@@ -3,8 +3,15 @@ import { CheckCircle2, XCircle, ArrowRight, RotateCcw, Plus, Shuffle, RefreshCcw
 
 const shuffle = <T,>(items: T[]) => Array.isArray(items) ? [...items].sort(() => Math.random() - 0.5) : [];
 
+// Демо-данные на случай отсутствия сервера
+const INITIAL_TESTS = [
+  { id: 1, question: 'Какое количество корней и корневых каналов чаще всего имеет первый постоянный моляр верхней челюсти (зуб 16)?', options: ['2 корня, 2 канала', '3 корня, 3 канала', '3 корня, 4 канала (МВ1, МВ2, ДВ, Н)', '1 корень, 3 канала'], correct: 2, explanation: 'В зубе 16 мезиально-щечный корень в 70-80% случаев содержит два канала (MB1 и MB2).', category: 'Анатомия зубов' },
+  { id: 2, question: 'Какой анестетик предпочтителен при лечении зубов у пациента с сопутствующей гипертонической болезнью?', options: ['Артикаин 4% с эпинефрином 1:100 000', 'Мепивакаин 3% без вазоконстриктора', 'Лидокаин 2% с адреналином 1:50 000', 'Новокаин 2%'], correct: 1, explanation: 'Мепивакаин 3% не обладает выраженным сосудорасширяющим действием и применяется без адреналина.', category: 'Фармакология' },
+  { id: 3, question: 'Какая структура поражается первой при возникновении глубокого кариеса?', options: ['Пульпа зуба', 'Периферический дентин', 'Околопульпарный дентин', 'Цемент корня'], correct: 2, explanation: 'При глубоком кариесе процесс распространяется на околопульпарный дентин.', category: 'Терапия' }
+];
+
 export default function Tests() {
-  const [allQuestions, setAllQuestions] = useState<any[]>([]);
+  const [allQuestions, setAllQuestions] = useState<any[]>(INITIAL_TESTS);
   const [state, setState] = useState<any>({ review_test_ids: [] });
   const [mode, setMode] = useState<'random' | 'review'>('random');
   const [curr, setCurr] = useState(0); 
@@ -14,23 +21,16 @@ export default function Tests() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ question: '', category: '', explanation: '', correct: 0, options: ['', '', '', ''] });
 
-  const load = async () => { 
-    try {
-      const [testsRes, progressRes] = await Promise.all([
-        fetch('/api/tests').then(r => r.json()).catch(() => []), 
-        fetch('/api/study-state').then(r => r.json()).catch(() => ({ review_test_ids: [] }))
-      ]);
-      setAllQuestions(Array.isArray(testsRes) ? testsRes : []); 
-      setState(progressRes || { review_test_ids: [] }); 
-    } catch (e) {
-      setAllQuestions([]);
+  useEffect(() => {
+    // Пытаемся взять из localStorage или используем дефолтные
+    const saved = localStorage.getItem('dental_tests');
+    if (saved) {
+      try { setAllQuestions(JSON.parse(saved)); } catch (e) {}
     }
-  };
-
-  useEffect(() => { load(); }, []);
+  }, []);
 
   const questions = useMemo(() => {
-    if (!Array.isArray(allQuestions)) return [];
+    if (!Array.isArray(allQuestions)) return INITIAL_TESTS;
     const filtered = mode === 'review' 
       ? allQuestions.filter(q => Array.isArray(state?.review_test_ids) && state.review_test_ids.includes(q.id)) 
       : allQuestions;
@@ -41,19 +41,18 @@ export default function Tests() {
 
   const q = questions[curr];
 
-  const handleSelect = async (answer: number) => { 
+  const handleSelect = (answer: number) => { 
     if (selected !== null || !q) return; 
     setSelected(answer); 
     const correct = answer === q.correct; 
     if (correct) setScore(s => s + 1); 
-    try {
-      const result = await fetch('/api/study/test-answer', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ questionId: q.id, correct }) 
-      }).then(r => r.json()); 
-      if (result) setState(result); 
-    } catch (e) {}
+    
+    if (!correct) {
+      setState((prev: any) => ({
+        ...prev,
+        review_test_ids: Array.from(new Set([...(prev.review_test_ids || []), q.id]))
+      }));
+    }
   };
 
   const next = () => { 
@@ -65,25 +64,17 @@ export default function Tests() {
     }
   };
 
-  const addTest = async (event: React.FormEvent) => { 
+  const addTest = (event: React.FormEvent) => { 
     event.preventDefault(); 
-    const response = await fetch('/api/tests', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(form) 
-    }); 
-    if (!response.ok) return; 
+    const newTest = { id: Date.now(), ...form };
+    const updated = [newTest, ...allQuestions];
+    setAllQuestions(updated);
+    localStorage.setItem('dental_tests', JSON.stringify(updated));
     setShowForm(false); 
     setForm({ question: '', category: '', explanation: '', correct: 0, options: ['', '', '', ''] }); 
-    await load(); 
   };
 
-  if (!Array.isArray(allQuestions) || allQuestions.length === 0) {
-    return <div className="text-mint animate-pulse p-8">Загрузка тестов...</div>;
-  }
-
-  // Безопасное приведение options к массиву (если пришла строка из БД)
-  const optionsArray = q ? (Array.isArray(q.options) ? q.options : (typeof q.options === 'string' ? JSON.parse(q.options) : [])) : [];
+  const optionsArray = q ? (Array.isArray(q.options) ? q.options : []) : [];
 
   return (
     <div className="max-w-2xl mx-auto space-y-5 animate-[fade-in_.45s_ease-out]">
