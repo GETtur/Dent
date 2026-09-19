@@ -21,7 +21,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Главный Hero-баннер в стиле NVIDIA RTX Keynote */}
       <div className="nvidia-card p-8 relative overflow-hidden border-nvidia-neon/30">
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-nvidia-neon/20 via-nvidia-cyan/10 to-transparent blur-3xl pointer-events-none" />
         
@@ -58,7 +57,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Метрики телеметрии */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'ОТВЕТОВ В ТЕСТАХ', val: data.tests_answered || 0, icon: Target, glow: 'text-nvidia-cyan', progress: `${Math.min((data.tests_answered || 0) * 2, 100)}%` },
@@ -85,7 +83,6 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Блоки оперативного плана */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="nvidia-card p-6">
           <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">

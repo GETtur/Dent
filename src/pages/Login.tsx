@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Lock, User, ShieldCheck, AlertCircle, ArrowRight, Sparkles, Activity, Cpu, Stethoscope, Layers, Flame } from 'lucide-react';
 
-// Высокоточный процедурный рендер голографического зуба и ладони из частиц
 function CyberHologramCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -22,7 +21,6 @@ function CyberHologramCanvas() {
     };
     window.addEventListener('resize', handleResize);
 
-    // Генерация анатомического моляра: бугристая коронка и три расходящихся корня
     interface Point3D { x: number; y: number; z: number; isRoot: boolean; brightness: number; size: number }
     const points: Point3D[] = [];
     const totalPoints = 3600;
@@ -32,7 +30,6 @@ function CyberHologramCanvas() {
       let x = 0, y = 0, z = 0;
 
       if (!isRoot) {
-        // Коронка моляра с 4 анатомическими бугорками
         const u = Math.random();
         const v = Math.random() * Math.PI * 2;
         const crownW = 54 + 14 * Math.cos(2 * v);
@@ -41,17 +38,14 @@ function CyberHologramCanvas() {
         x = Math.cos(v) * crownW * Math.pow(u, 0.45);
         z = Math.sin(v) * crownD * Math.pow(u, 0.45);
         
-        // Рельеф фиссур и бугорков на окклюзии
         const bumps = Math.sin(x * 0.12) * Math.cos(z * 0.12) * 9;
         const heightFactor = Math.random();
         y = -75 + heightFactor * 65 + bumps * (1 - heightFactor);
       } else {
-        // Три корня: два щечных и небный — силуэт остаётся узнаваемым при вращении
         const rootIndex = Math.floor(Math.random() * 3);
         const side = [-25, 0, 25][rootIndex];
-        const progress = Math.random(); // 0 у шейки, 1 у апекса
+        const progress = Math.random();
         
-        // Сужение корней к верхушкам и изгиб
         const curve = Math.sin(progress * Math.PI) * (rootIndex === 0 ? -9 : rootIndex === 2 ? 9 : 3);
         const radius = (1 - progress * 0.82) * 17 * (0.8 + Math.random() * 0.4);
         const angle = Math.random() * Math.PI * 2;
@@ -69,7 +63,6 @@ function CyberHologramCanvas() {
       });
     }
 
-    // Внешние парящие фотоны (светящиеся искры)
     const sparks = Array.from({ length: 40 }, () => ({
       x: (Math.random() - 0.5) * 320,
       y: (Math.random() - 0.5) * 320,
@@ -87,11 +80,9 @@ function CyberHologramCanvas() {
       const cy = height / 2 - 35;
       const floatY = Math.sin(t * 1.6) * 9;
 
-      // 1. СВЕТЯЩАЯСЯ ЭНЕРГЕТИЧЕСКАЯ ЛАДОНЬ (КАК НА ГИФКЕ)
       ctx.save();
       ctx.translate(cx, cy + 115);
 
-      // Радиальное неоновое поле ладони
       const palmGlow = ctx.createRadialGradient(0, 20, 10, 0, 20, 150);
       palmGlow.addColorStop(0, 'rgba(0, 130, 255, 0.42)');
       palmGlow.addColorStop(0.5, 'rgba(0, 229, 255, 0.15)');
@@ -101,20 +92,17 @@ function CyberHologramCanvas() {
       ctx.arc(0, 20, 150, 0, Math.PI * 2);
       ctx.fill();
 
-      // Неоновый каркас ладони
       ctx.strokeStyle = '#00B4D8';
       ctx.lineWidth = 2.2;
       ctx.shadowColor = '#00F5D4';
       ctx.shadowBlur = 18;
 
-      // Чаша кисти
       ctx.beginPath();
       ctx.moveTo(-115, -15);
       ctx.bezierCurveTo(-100, 50, -35, 75, 0, 75);
       ctx.bezierCurveTo(35, 75, 100, 50, 115, -15);
       ctx.stroke();
 
-      // Пальцы-дуги силового поля
       const fingers = [
         { startX: -90, cpx: -75, cpy: -45, endX: -50, endY: -75 },
         { startX: -32, cpx: -20, cpy: -55, endX: -12, endY: -88 },
@@ -129,19 +117,16 @@ function CyberHologramCanvas() {
         ctx.stroke();
       });
 
-      // Голографический эмиттер под рукой
       ctx.beginPath();
       ctx.ellipse(0, 48, 80, 20, 0, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(0, 255, 135, 0.55)';
       ctx.stroke();
       ctx.restore();
 
-      // 2. ОБЪЕМНЫЙ НЕОНОВЫЙ ЗУБ ИЗ 3500 КВАНТОВЫХ ТОЧЕК
       const rotY = t * 0.65;
       const cosR = Math.cos(rotY);
       const sinR = Math.sin(rotY);
 
-      // Проекция 3D точек на плоскость холста
       const projected = points.map((p) => {
         const rotX = p.x * cosR - p.z * sinR;
         const rotZ = p.x * sinR + p.z * cosR;
@@ -157,10 +142,8 @@ function CyberHologramCanvas() {
         };
       });
 
-      // Сортировка по Z для объемного наложения частиц
       projected.sort((a, b) => b.depth - a.depth);
 
-      // Мягкое объёмное свечение и тонкие анатомические траектории на коронке.
       const toothGlow = ctx.createRadialGradient(cx, cy - 30 + floatY, 12, cx, cy - 30 + floatY, 165);
       toothGlow.addColorStop(0, 'rgba(0, 255, 180, 0.13)');
       toothGlow.addColorStop(0.55, 'rgba(0, 229, 255, 0.045)');
@@ -177,7 +160,6 @@ function CyberHologramCanvas() {
       }
       ctx.restore();
 
-      // Отрисовка частиц зуба
       ctx.shadowBlur = 10;
       projected.forEach((p) => {
         const depthAlpha = Math.min(1, Math.max(0.18, (p.depth + 75) / 150));
@@ -194,7 +176,6 @@ function CyberHologramCanvas() {
         ctx.fill();
       });
 
-      // 3. ПАРАЛЛЕЛЬНЫЕ ИСКРЫ / ФОТОНЫ
       sparks.forEach((s) => {
         s.y -= s.speed;
         s.pulse += 0.05;
@@ -256,23 +237,16 @@ export default function Login({ onLogin }: LoginProps) {
 
   return (
     <div className="min-h-screen bg-[#030712] flex items-center justify-center p-4 lg:p-10 relative overflow-hidden font-mono select-none">
-      {/* 1. Глубокие фоновые неоновые туманности */}
       <div className="absolute top-1/4 left-8 w-[650px] h-[650px] bg-cyan-500/15 rounded-full blur-[180px] pointer-events-none" />
       <div className="absolute bottom-10 right-8 w-[650px] h-[650px] bg-emerald-500/15 rounded-full blur-[180px] pointer-events-none" />
 
-      {/* 2. СБАЛАНСИРОВАННАЯ 3-КОЛОНОЧНАЯ КОМПОЗИЦИЯ НА ВЕСЬ ЭКРАН */}
       <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-        
-        {/* КОЛОНКА 1 (СЛЕВА): Голографический 3D-зуб из частиц над ладонью */}
         <div className="lg:col-span-4 flex flex-col items-center justify-center">
           <div className="w-full h-80 sm:h-96 md:h-[450px] relative flex items-center justify-center">
-            
-            {/* Лазерный HUD индикатор */}
             <div className="absolute top-2 left-4 z-20 flex items-center gap-2 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-cyan-400/40 text-[11px] text-cyan-300 shadow-[0_0_20px_rgba(0,229,255,0.25)]">
               <Activity size={14} className="animate-pulse text-cyan-400" />
               <span>DENTAL MATRIX // QUANTUM TOOTH</span>
             </div>
-
             <CyberHologramCanvas />
           </div>
 
@@ -285,7 +259,6 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
         </div>
 
-        {/* КОЛОНКА 2 (ЦЕНТР): Форма авторизации «Жидкое стекло» */}
         <div className="lg:col-span-4 flex justify-center">
           <div
             className="w-full max-w-md p-8 md:p-10 rounded-3xl relative border border-white/20 transition-all duration-500"
@@ -296,7 +269,6 @@ export default function Login({ onLogin }: LoginProps) {
               boxShadow: 'inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.3), 0 30px 70px 0 rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 229, 255, 0.15)'
             }}
           >
-            {/* Глянцевый неоновый блик по кромке стекла */}
             <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent" />
 
             <div className="text-center mb-8">
@@ -318,7 +290,6 @@ export default function Login({ onLogin }: LoginProps) {
                 </div>
               )}
 
-              {/* Поле логина (прозрачное темное жидкое стекло) */}
               <div>
                 <label className="block text-xs text-slate-300 mb-2 font-bold tracking-wider">ИДЕНТИФИКАТОР (ЛОГИН)</label>
                 <div className="relative">
@@ -334,7 +305,6 @@ export default function Login({ onLogin }: LoginProps) {
                 </div>
               </div>
 
-              {/* Поле пароля (прозрачное темное жидкое стекло) */}
               <div>
                 <label className="block text-xs text-slate-300 mb-2 font-bold tracking-wider">ПАРОЛЬ ДОСТУПА</label>
                 <div className="relative">
@@ -377,9 +347,7 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
         </div>
 
-        {/* КОЛОНКА 3 (СПРАВА): Заполнение пространства — Интерактивная телеметрия */}
         <div className="hidden lg:flex lg:col-span-4 flex-col gap-4">
-          {/* Профиль студентки */}
           <div className="p-5 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
             <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2.5">
               <span className="text-xs text-cyan-300 font-bold flex items-center gap-2">
@@ -396,7 +364,6 @@ export default function Login({ onLogin }: LoginProps) {
             </div>
           </div>
 
-          {/* Дисциплины семестра */}
           <div className="p-5 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] space-y-3.5">
             <div className="flex items-center justify-between text-xs text-slate-300 font-bold">
               <span className="flex items-center gap-1.5">
@@ -436,7 +403,6 @@ export default function Login({ onLogin }: LoginProps) {
             </div>
           </div>
 
-          {/* Ударный темп */}
           <div className="p-4 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/15 flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0">
               <Flame size={20} className="animate-bounce" />

@@ -42,9 +42,6 @@ const DENTAL_DB: Record<number, { name: string; jaw: string; group: string; root
   38: { name: 'Третий нижний левый моляр', jaw: 'Нижняя', group: 'Моляры', roots: '2', canals: '2-3', features: 'Близкое предлежание к нижнечелюстному каналу (риск неврита n. alveolaris inferior).' },
 };
 
-// OBJ содержит по одному мешу на челюсть, а не отдельный меш на каждый зуб.
-// Поэтому для номера используем точку попадания в координатах меша, а челюсть
-// определяем по имени родительского объекта из OBJ, а не по высоте точки.
 function getJawFromObject(object: THREE.Object3D): 'upper' | 'lower' | null {
   let current: THREE.Object3D | null = object;
 
@@ -58,36 +55,32 @@ function getJawFromObject(object: THREE.Object3D): 'upper' | 'lower' | null {
   return null;
 }
 
-// Точное определение зуба в локальных координатах меша
 function calculateAccurateFDI(mesh: THREE.Mesh, hitWorldPoint: THREE.Vector3): number {
   const local = hitWorldPoint.clone();
   mesh.worldToLocal(local);
 
   const jaw = getJawFromObject(mesh);
-  // Резервный вариант нужен только для моделей без именованных групп.
   const isUpper = jaw ? jaw === 'upper' : local.y > 0.024;
 
-  // Определение номера зуба (1..8) по оси X меша (от резцов -0.033 до моляров +0.030)
   let tooth = 8;
   if (local.x < -0.029) {
-    tooth = 1; // Центральные резцы
+    tooth = 1;
   } else if (local.x < -0.022) {
-    tooth = 2; // Боковые резцы
+    tooth = 2;
   } else if (local.x < -0.013) {
-    tooth = 3; // Клыки
+    tooth = 3;
   } else if (local.x < -0.004) {
-    tooth = 4; // Первые премоляры
+    tooth = 4;
   } else if (local.x < 0.006) {
-    tooth = 5; // Вторые премоляры
+    tooth = 5;
   } else if (local.x < 0.017) {
-    tooth = 6; // Первые моляры ("шестерки")
+    tooth = 6;
   } else if (local.x < 0.026) {
-    tooth = 7; // Вторые моляры ("семерки")
+    tooth = 7;
   } else {
-    tooth = 8; // Третьи моляры (зубы мудрости)
+    tooth = 8;
   }
 
-  // Определение стороны: в локальной системе координат пациента -Z это правая сторона, +Z это левая
   const isRight = local.z < 0;
 
   let quadrant = 1;
@@ -116,7 +109,6 @@ function PhotorealisticTeeth({ onSelect, onPointHit }: any) {
         const clickedMesh = e.object;
         const hit = e.point;
 
-        // Рассчитываем точный FDI
         const fdi = calculateAccurateFDI(clickedMesh, hit);
         onSelect(fdi);
         onPointHit(hit);
@@ -170,7 +162,6 @@ export default function Atlas3D() {
   return (
     <div className="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-120px)] pb-12">
       <div className="w-full lg:w-2/3 flex flex-col gap-4">
-        {/* Зубная формула FDI */}
         <div className="nvidia-card p-4 border-nvidia-neon/20">
           <div className="flex justify-between items-center mb-3">
             <span className="text-[11px] font-mono text-slate-400 tracking-wider flex items-center gap-1.5">
@@ -218,7 +209,6 @@ export default function Atlas3D() {
           </div>
         </div>
 
-        {/* 3D Вьюпорт */}
         <div className="nvidia-card flex-1 min-h-[460px] relative overflow-hidden flex flex-col border-nvidia-neon/20">
           <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-abyss/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-nvidia-neon/40 text-xs font-mono text-nvidia-neon shadow-[0_0_15px_rgba(0,255,135,0.2)]">
             <Crosshair size={14} className="animate-spin text-nvidia-neon" />
@@ -252,7 +242,6 @@ export default function Atlas3D() {
         </div>
       </div>
 
-      {/* Клинический протокол */}
       <div className="w-full lg:w-1/3 nvidia-card p-6 overflow-y-auto border-nvidia-neon/20 flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <span className="font-mono text-xs font-bold text-nvidia-neon bg-nvidia-dark border border-nvidia-neon/40 px-3 py-1 rounded-md shadow-[0_0_10px_rgba(0,255,135,0.3)]">

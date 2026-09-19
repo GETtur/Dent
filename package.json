@@ -4,16 +4,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node backend/server.js\"",
+    "dev": "vite",
     "build": "vite build"
   },
   "dependencies": {
     "@react-three/drei": "^9.99.0",
     "@react-three/fiber": "^8.15.16",
     "clsx": "^2.1.1",
-    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
-    "express": "^4.19.2",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
